@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "komickers"
+version = "0.18.5"
+description = "Download your comics automatically, using your terminal alone"
+readme = "README.md"
+authors = [{ name = "Arshia Shaygan", email = "arshiashaygan07@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "black>=26.5.1",
+    "httplib2>=0.31.0",
+    "tomlkit>=0.15.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest >= 7.0.0", "ruff >= 0.1.0", "black >= 23.0.0", "mypy"]
+
+google = [
+    "google-api-core>=2.26.0",
+    "google-api-python-client>=2.184.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.2.2",
+]
+
+all = ["komickers[dev, google]"]
+
+[project.scripts]
+komickers = "komickers.main:main"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]

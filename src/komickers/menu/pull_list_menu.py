@@ -1,0 +1,70 @@
+from pathlib import Path
+
+from socket import gaierror
+import httplib2
+
+from komickers.core.downloader import extract_comics_from_file, download_from_inventory
+from komickers.core.extractor import extract_names
+from komickers.mail_reader.reader import read_emails
+
+
+def pull_list_menu(config: dict) -> None:
+    print("\n=================== PULL LIST MENU ===================\n")
+    tmp_path: Path = Path(config["directories"]["tmp_dir"])
+    tmp_path.mkdir(parents=True, exist_ok=True)
+
+    pull_list_path: Path | None = None
+    pulled: bool = False
+    while not pulled:
+        try:
+            print(
+                "Please select your preferred method of logging in:\ng) Google API\ni) IMAP\n"
+            )
+            login_method: str = input("your selection: ")
+            pull_list_path: Path | None = read_emails(config, login_method)
+            pulled = True
+
+        except httplib2.error.ServerNotFoundError:
+            print("Couldn't connect to Gmail API Services. Aborting...")
+            print("\n======================================================\n")
+            return
+        except TimeoutError:
+            print("It took too long to connect to email services. Aborting...")
+            print("\n======================================================\n")
+            return
+        except ValueError:
+            print(
+                "\n.===============================."
+                "\n||Please select a correct option||"
+                "\n^===============================^\n"
+            )
+        except gaierror:
+            print("Couldn't connect to IMAP Services. Aborting...")
+            print("\n======================================================\n")
+            return
+
+    if pull_list_path is None:
+        print("Couldn't determine the path of the pull list. Aborting...")
+        print("\n======================================================\n")
+        return
+
+    index_path: Path = pull_list_path / "index.html"
+    inbox_path: Path = Path(config["download"]["downloads_dir"])
+    method: str = config["download"]["download_manager"]
+    pull_list: list[tuple[str, str]] | None = extract_names(index_path)
+
+    if pull_list is None:
+        print("Couldn't extract comic names. Aborting...")
+        print("\n======================================================\n")
+        return
+
+    inventory: tuple[list[str], list[str], Path] | None = extract_comics_from_file(
+        pull_list_path, pull_list
+    )
+
+    if inventory is None:
+        print("An error occured while extracting download links...")
+        print("\n======================================================\n")
+        return
+
+    download_from_inventory(inventory, inbox_path, method)
