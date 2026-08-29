@@ -42,9 +42,29 @@ coverage.xml
 # Rope
 .ropeproject
 
-# Django stuff:
-*.log
-*.pot
-
 # Sphinx documentation
 docs/_build/
+
+# IDE (VS code and Zen) configs
+.vscode/
+.zen/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Linting & type checking
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environment
+.vent/
+
+# Local artifacts
+.tmp/
+.config/
+inbox/
+credentials/
+token/
