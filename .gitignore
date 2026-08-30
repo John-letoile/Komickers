@@ -60,7 +60,7 @@ htmlcov/
 .mypy_cache/
 
 # Virtual environment
-.vent/
+.venv/
 
 # Local artifacts
 .tmp/
