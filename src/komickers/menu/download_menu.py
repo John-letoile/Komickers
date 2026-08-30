@@ -2,7 +2,11 @@ from pathlib import Path
 
 
 from komickers.core.extractor import formatter
-from komickers.core.downloader import extract_comics_from_file, download_from_inventory
+from komickers.core.downloader import (
+    Inventory,
+    extract_comics_from_file,
+    download_from_inventory,
+)
 
 
 def download_menu(config: dict) -> None:
@@ -25,13 +29,15 @@ def download_menu(config: dict) -> None:
     pull_list: list[tuple[str, str]] = [(name, formatter(year, name)) for name in names]
     inbox_path = Path(config["download"]["downloads_dir"])
     method = config["download"]["download_manager"]
-    inventory: tuple[list[str], list[str], Path] | None = extract_comics_from_file(
-        index_dir, pull_list
-    )
+    inventory: Inventory | None = extract_comics_from_file(index_dir, pull_list)
 
     if inventory is None:
         print("An error occured while extracting download links...")
         print("\n======================================================\n")
         return
 
-    download_from_inventory(inventory, inbox_path, method)
+    try:
+        download_from_inventory(inventory, inbox_path, method)
+    except ValueError as ve:
+        print(ve)
+        print("\n======================================================\n")

@@ -3,7 +3,11 @@ from pathlib import Path
 from socket import gaierror
 import httplib2
 
-from komickers.core.downloader import extract_comics_from_file, download_from_inventory
+from komickers.core.downloader import (
+    Inventory,
+    extract_comics_from_file,
+    download_from_inventory,
+)
 from komickers.core.extractor import extract_names
 from komickers.mail_reader.reader import read_emails
 
@@ -58,13 +62,15 @@ def pull_list_menu(config: dict) -> None:
         print("\n======================================================\n")
         return
 
-    inventory: tuple[list[str], list[str], Path] | None = extract_comics_from_file(
-        pull_list_path, pull_list
-    )
+    inventory: Inventory | None = extract_comics_from_file(pull_list_path, pull_list)
 
     if inventory is None:
         print("An error occured while extracting download links...")
         print("\n======================================================\n")
         return
 
-    download_from_inventory(inventory, inbox_path, method)
+    try:
+        download_from_inventory(inventory, inbox_path, method)
+    except ValueError as ve:
+        print(ve)
+        print("\n======================================================\n")

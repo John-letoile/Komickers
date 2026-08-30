@@ -188,8 +188,6 @@ def download_from_inventory(
     missed_comics: list[str] = comics_inventory.missed
     extracted_urls_path: Path = comics_inventory.urls_path
 
-    print(extracted_urls_path)
-
     if len(pulled_comics) == 0:
         print("No comics were pulled. Aborting...")
         print("\n======================================================\n")
