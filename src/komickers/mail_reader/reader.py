@@ -7,6 +7,13 @@ from .reader_imap import read_emails_oauth as _read_emails_oauth
 from .utils import get_credentials
 
 
+def _fetch_method_for_imap() -> str:
+    print(
+        "\nPlease select one of the following ways to log into your account:\na) App Password\no) OAuth2\n"
+    )
+    return input("your selection: ")
+
+
 def read_emails(config: dict, login_method: str) -> Path | None:
     tmp_path = Path(config["directories"]["tmp_dir"])
 
@@ -18,13 +25,9 @@ def read_emails(config: dict, login_method: str) -> Path | None:
         return _read_emails_google(creds, tmp_path)
 
     elif login_method.lower() in {"i", "2"}:
-        print(
-            "\nPlease select one of the following ways to log into your account:\na) App Password\no) OAuth2\n"
-        )
-        auth_method = input("your selection: ")
         email_address = config["email"]["email_address"]
         provider = config["email"]["provider"]
-
+        auth_method = _fetch_method_for_imap()
         if auth_method.lower() in {"a", "1"}:
             app_password = config["email"]["app_password"]
             return _read_emails_app_password(

@@ -46,6 +46,8 @@ def pull_list_menu(config: dict) -> None:
             print("Couldn't connect to IMAP Services. Aborting...")
             print("\n======================================================\n")
             return
+        except ImportError as ie:
+            print(ie)
 
     if pull_list_path is None:
         print("Couldn't determine the path of the pull list. Aborting...")
