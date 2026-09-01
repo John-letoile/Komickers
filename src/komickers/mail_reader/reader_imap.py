@@ -4,9 +4,13 @@ from email import policy
 from email.message import EmailMessage
 from pathlib import Path
 from typing import Any
+import logging
+from socket import gaierror
 
 from komickers.mail_reader.utils import save_pull_list
+from komickers.exceptions import AuthenticationError, EmailError, InboxError
 
+logger = logging.getLogger(__name__)
 FetchedEmail = tuple[str, str]  # (subject, html_body)
 
 
@@ -47,24 +51,37 @@ def _fetch_latest_imap(mail: imaplib.IMAP4_SSL, provider: str) -> FetchedEmail |
 def read_emails_app_password(
     email_address: str, app_password: str, provider: str, tmp_path: Path
 ) -> Path | None:
-    with imaplib.IMAP4_SSL("imap.gmail.com") as mail:
-        try:
-            mail.login(email_address, app_password)
-        except imaplib.IMAP4.error as e:
-            print(f"IMAP authentication failed for {email_address}: {e}")
-            return
+    try:
+        with imaplib.IMAP4_SSL("imap.gmail.com") as mail:
+            try:
+                mail.login(email_address, app_password)
+            except imaplib.IMAP4.error as e:
+                print(f"IMAP authentication failed for {email_address}: {e}")
+                return
 
-        try:
-            mail.select("INBOX")
-        except imaplib.IMAP4.error as e:
-            print(f"Couldn't open INBOX: {e}")
-            return
+            try:
+                mail.select("INBOX")
+            except imaplib.IMAP4.error as e:
+                logger.error("Failed to open INBOX: %s", e)
+                raise InboxError(f"Failed to open inbox: {e}") from None
 
-        fetched = _fetch_latest_imap(mail, provider)
+            fetched = _fetch_latest_imap(mail, provider)
+
+    except imaplib.IMAP4.error as e:
+        logger.error("IMAP connection failed: %s", e)
+        raise EmailError(f"IMAP connection failed: {e}") from None
+
+    except TimeoutError:
+        logger.exception("IMAP connection timed out")
+        raise EmailError("Connection to email server timed out.") from None
+
+    except gaierror:
+        logger.exception("IMAP DNS resolution failed")
+        raise EmailError("Could not resolve email server address.") from None
 
     if fetched is None:
-        print("No matching emails found.")
-        return None
+        logger.warning("No matching pull list emails found via IMAP")
+        raise EmailError("No pull list emails found in inbox.")
 
     return save_pull_list(tmp_path, *fetched)
 
@@ -82,24 +99,37 @@ def read_emails_oauth(
             return auth_string.encode()
         return b""
 
-    with imaplib.IMAP4_SSL("imap.gmail.com") as mail:
-        try:
-            mail.authenticate("XOAUTH2", xoauth2)
-        except imaplib.IMAP4.error as e:
-            print(f"IMAP OAuth failed for {email_address}: {e}")
-            return None
+    try:
+        with imaplib.IMAP4_SSL("imap.gmail.com") as mail:
+            try:
+                mail.authenticate("XOAUTH2", xoauth2)
+            except imaplib.IMAP4.error as e:
+                logger.error("IMAP authentication failed for %s: %s", email_address, e)
+                raise AuthenticationError(f"IMAP authentication failed: {e}") from None
 
-        try:
-            mail.select("INBOX")
-        except imaplib.IMAP4.error as e:
-            print(f"Couldn't open INBOX: {e}")
-            return None
+            try:
+                mail.select("INBOX")
+            except imaplib.IMAP4.error as e:
+                logger.error("IMAP failed to read inbox: %s", e)
+                raise InboxError(f"Failed to open inbox: {e}") from None
 
-        # Search for messages from the sender whose subject contains the phrase
-        fetched = _fetch_latest_imap(mail, provider)
+            # Search for messages from the sender whose subject contains the phrase
+            fetched = _fetch_latest_imap(mail, provider)
+
+    except imaplib.IMAP4.error as e:
+        logger.error("IMAP connection failed: %s", e)
+        raise EmailError(f"IMAP connection failed: {e}") from None
+
+    except TimeoutError:
+        logger.exception("IMAP connection timed out")
+        raise EmailError("Connection to email server timed out.") from None
+
+    except gaierror:
+        logger.exception("IMAP DNS resolution failed")
+        raise EmailError("Could not resolve email server address.") from None
 
     if fetched is None:
-        print("No matching emails found.")
-        return None
+        logger.warning("No matching pull list emails found via IMAP OAuth")
+        raise EmailError("No pull list emails found in inbox.")
 
     return save_pull_list(tmp_path, *fetched)

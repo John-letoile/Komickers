@@ -1,7 +1,11 @@
 import copy
 from pathlib import Path
+import logging
 
+from komickers.exceptions import ConfigError
 import tomlkit
+
+logger = logging.getLogger(__name__)
 
 
 def _default_config() -> dict:
@@ -43,7 +47,16 @@ def load_config() -> dict:
     with open(path, "r", encoding="utf-8") as f:
         data = tomlkit.load(f)
 
+    if not _validate_config(data):
+        logger.error("Invalid configuration")
+        raise ConfigError("Invalid configuration")
+
     return _deep_merge(_default_config(), data)
+
+
+# TODO: implement a config valdiator (via a schema)
+def _validate_config(config: dict) -> bool:
+    return True
 
 
 def save_config(config: dict) -> None:
@@ -76,6 +89,7 @@ def update_config(**kwargs) -> None:
                 default_config[section][subkey] if value == "" else value
             )
         else:
-            raise KeyError(f"Invalid configuration key: {key}")
+            logger.error("Invalid configuration: %s", key)
+            raise ConfigError(f"Invalid configuration key: {key}")
 
     save_config(config)

@@ -3,8 +3,12 @@ import sys
 from pathlib import Path
 from typing import TextIO
 from dataclasses import dataclass
+import logging
 
 from .extractor import extract_download_link
+from komickers.exceptions import DownloaderError, ExtractionError
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -28,8 +32,8 @@ def save_html_file(
             ["curl", "-fL", url], check=True, capture_output=True
         )
     except subprocess.CalledProcessError:
-        print(f"Couldn't fetch the html file for {comic_name}")
-        return None
+        logger.warning("Failed to fetch html file for %s", comic_name)
+        raise ExtractionError(f"Failed to fetch html file for {comic_name}")
 
     output = result.stdout
     file_path.write_bytes(output)
@@ -108,8 +112,11 @@ def download_comics(urls_file_path: Path, inbox_dir: Path, method: str) -> None:
         else:
             raise ValueError("Please select one of the available download methods")
 
-    except subprocess.CalledProcessError:
-        print(f"Couldn't run the download manager: {method}")
+    except subprocess.CalledProcessError as e:
+        logger.error(
+            "Download manager '%s' failed (exit code %d)", method, e.returncode
+        )
+        raise DownloaderError(f"Download manager '{method}' failed") from e
     except RuntimeError as rte:
         print(rte)
 

@@ -2,9 +2,18 @@ from __future__ import annotations
 
 from base64 import urlsafe_b64decode
 from pathlib import Path
+from socket import gaierror
 from typing import Any
+import logging
+
+import httplib2
+from google.auth.exception import RefreshError
+from googleapiclient.errors import HttpError
 
 from .utils import save_pull_list
+from komickers.exceptions import AuthenticationError, EmailError
+
+logger = logging.getLogger(__name__)
 
 
 def build_gmail_service(creds: Any) -> Any:
@@ -15,7 +24,7 @@ def build_gmail_service(creds: Any) -> Any:
             "The 'google' optional dependencies are required to read Google emails"
         ) from e
 
-    return build("gmail", "v1", credentials=creds)
+    build("gmail", "v1", credentials=creds)
 
 
 def _search_latest_google(service: Any, query: str) -> dict | None:
@@ -92,6 +101,23 @@ def read_emails(creds: Any, tmp_path: Path) -> Path | None:
         return save_pull_list(tmp_path, subject, html_body)
 
     except RefreshError:
-        print("Token expired/revoked — delete token/token.pickle and re-authenticate.")
+        logger.error("Token expired/revoked", exc_info=True)
+        raise AuthenticationError(
+            "Token expired/revoked — delete token/token.pickle and re-authenticate."
+        ) from None
+
     except HttpError as e:
-        print(f"Gmail API error: {e.status_code} {e.reason}")
+        logger.error(f"Gmail API error: %d %s", e.status_code, e.reason, exc_info=True)
+        raise EmailError(f"Gmail API error: {e.status_code} {e.reason}") from None
+
+    except httplib2.error.ServerNotFoundError as e:
+        logger.error("Gmail API error: %d %s", e.status_code, e.reason, exc_info=True)
+        raise EmailError(f"Gmail API error: {e.status_code} {e.reason}") from None
+
+    except TimeoutError:
+        logger.error("Gmail API request timed out", exc_info=True)
+        raise EmailError("Request to Gmail API timed out.") from None
+
+    except gaierror:
+        logger.error("Gmail API DNS resolution failed", exc_info=True)
+        raise EmailError("Could not resolve Gmail API server address.") from None

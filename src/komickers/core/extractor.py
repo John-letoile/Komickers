@@ -2,7 +2,11 @@ import subprocess
 from pathlib import Path
 from bs4 import BeautifulSoup
 import re
+import logging
 
+from komickers.exceptions import ExtractionError
+
+logger = logging.getLogger(__name__)
 SPECIAL_CHARACTERS: tuple[str, ...] = ("#", "(", ")", "!", "?", ":")
 
 
@@ -37,14 +41,14 @@ def extract_names(file_path: Path) -> list[tuple[str, str]] | None:
     )
 
     if heading is None:
-        print("Could not find the Pull List section")
-        return None
+        logger.error("No 'Pull List' section")
+        raise ExtractionError(f"Failed to find 'Pull List' section in {file_path}")
 
     section = heading.find_parent("table")
 
     if section is None:
-        print("Could not find the Pull List container")
-        return None
+        logger.error("No 'Pull List' container")
+        raise ExtractionError(f"Failed to find 'Pull List' container in {file_path}")
 
     for link in section.find_all("a", href=True):
         href = link["href"]
@@ -65,15 +69,16 @@ def extract_download_link(file_path: Path) -> str | None:
 
     # case sensitive. change if website changes format
     anchor = soup.select_one('a[title="DOWNLOAD NOW"]')
+
     if anchor is None:
-        print("No direct download link found...")
-        return
+        logger.warning("No 'DOWNLOAD NOW' linkg found in %s", file_path)
+        raise ExtractionError(f"No download link found in {file_path.name}")
 
     download_url: str | None = anchor.get("href")
 
     if not download_url:
-        print("Couldn't fetch download link...")
-        return
+        logger.warning("Download anchor has no 'href' in %s", file_path)
+        raise ExtractionError(f"Download link has no URL in {file_path.name}")
 
     result: subprocess.CompletedProcess = subprocess.run(
         ["curl", "-I", download_url],

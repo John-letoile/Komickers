@@ -3,6 +3,9 @@ from __future__ import annotations
 import pickle
 from pathlib import Path
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_credentials(

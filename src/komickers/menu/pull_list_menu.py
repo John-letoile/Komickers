@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 
 from socket import gaierror
 import httplib2
@@ -10,6 +11,14 @@ from komickers.core.downloader import (
 )
 from komickers.core.extractor import extract_names
 from komickers.mail_reader.reader import read_emails
+from komickers.exceptions import (
+    AuthenticationError,
+    EmailError,
+    ExtractionError,
+    DownloaderError,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def pull_list_menu(config: dict) -> None:
@@ -28,24 +37,23 @@ def pull_list_menu(config: dict) -> None:
             pull_list_path: Path | None = read_emails(config, login_method)
             pulled = True
 
-        except httplib2.error.ServerNotFoundError:
-            print("Couldn't connect to Gmail API Services. Aborting...")
+        except AuthenticationError as ae:
+            print(f"\nAuthentication failed: {ae}")
             print("\n======================================================\n")
             return
-        except TimeoutError:
-            print("It took too long to connect to email services. Aborting...")
+
+        except EmailError as ee:
+            print(f"Email error: {ee}")
             print("\n======================================================\n")
             return
+
         except ValueError:
             print(
                 "\n.===============================."
                 "\n||Please select a correct option||"
                 "\n^===============================^\n"
             )
-        except gaierror:
-            print("Couldn't connect to IMAP Services. Aborting...")
-            print("\n======================================================\n")
-            return
+
         except ImportError as ie:
             print(ie)
 
@@ -73,6 +81,6 @@ def pull_list_menu(config: dict) -> None:
 
     try:
         download_from_inventory(inventory, inbox_path, method)
-    except ValueError as ve:
-        print(ve)
+    except DownloaderError as de:
+        print(de)
         print("\n======================================================\n")

@@ -1,12 +1,12 @@
 from pathlib import Path
 
-
 from komickers.core.extractor import formatter
 from komickers.core.downloader import (
     Inventory,
     extract_comics_from_file,
     download_from_inventory,
 )
+from komickers.exceptions import DownloaderError
 
 
 def download_menu(config: dict) -> None:
@@ -38,6 +38,6 @@ def download_menu(config: dict) -> None:
 
     try:
         download_from_inventory(inventory, inbox_path, method)
-    except ValueError as ve:
-        print(ve)
+    except DownloaderError as de:
+        print(de)
         print("\n======================================================\n")
