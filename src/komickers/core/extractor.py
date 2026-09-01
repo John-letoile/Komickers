@@ -17,7 +17,7 @@ def formatter(year: str, line: str) -> str:
     translated_line = no_space_line.translate(
         str.maketrans("", "", "".join(SPECIAL_CHARACTERS))
     )
-    re.sub(r"-{2,}", "-", translated_line.lower())
+    translated_line = re.sub(r"-{2,}", "-", translated_line.lower())
     return f"/{translated_line.lower()}-{year}/"
 
 

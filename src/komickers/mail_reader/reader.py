@@ -1,4 +1,3 @@
-import email
 from pathlib import Path
 
 from .reader_google import read_emails as _read_emails_google
