@@ -1,0 +1,20 @@
+2026-09-01 23:48:12,541 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2026-09-01 23:48:13,229 - urllib3.connectionpool - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2026-09-01 23:48:13,745 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-09-01 23:51:09,277 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-09-01 23:52:24,835 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-09-01 23:52:24,843 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3Anoreply%40leagueofcomicgeeks.com+subject%3A%22Your+Comic+Pull+List+for%22&alt=json
+2026-09-01 23:52:25,642 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages/1a05e6999440ec42?format=full&alt=json
+2026-09-01 23:52:26,735 - komickers.core.downloader - WARNING - Failed to fetch html file for Spider-Woman 50th Anniversary Special #1
+2026-09-01 23:58:13,354 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-09-01 23:58:13,360 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3Anoreply%40leagueofcomicgeeks.com+subject%3A%22Your+Comic+Pull+List+for%22&alt=json
+2026-09-01 23:58:14,078 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages/1a05e6999440ec42?format=full&alt=json
+2026-09-01 23:58:15,216 - komickers.core.downloader - WARNING - Failed to fetch html file for Spider-Woman 50th Anniversary Special #1
+2026-09-01 23:58:15,756 - komickers.core.downloader - WARNING - Failed to fetch html file for Marvel Zombies: War Zone #1
+2026-09-01 23:58:16,304 - komickers.core.downloader - WARNING - Failed to fetch html file for Daredevil #6
+2026-09-01 23:58:16,850 - komickers.core.downloader - WARNING - Failed to fetch html file for Captain America #15
+2026-09-01 23:58:17,364 - komickers.core.downloader - WARNING - Failed to fetch html file for Fantastic Four #16
+2026-09-01 23:58:17,901 - komickers.core.downloader - WARNING - Failed to fetch html file for Batman #13
+2026-09-01 23:58:18,416 - komickers.core.downloader - WARNING - Failed to fetch html file for Wade Wilson: Deadpool #8
+2026-09-01 23:58:18,938 - komickers.core.downloader - WARNING - Failed to fetch html file for The Doom Patrol #1
+2026-09-01 23:58:19,531 - komickers.core.downloader - WARNING - Failed to fetch html file for Batgirl #23

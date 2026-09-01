@@ -176,8 +176,8 @@ def extract_comics_from_file(
                 print("The indicated file wasn't found")
                 _log_missed_comics(missed_comics, missed_file, comic[0])
 
-            except subprocess.CalledProcessError:
-                print("There was a problem with the extraction of download links")
+            except ExtractionError as ee:
+                print(ee)
                 _log_missed_comics(missed_comics, missed_file, comic[0])
 
     finally:

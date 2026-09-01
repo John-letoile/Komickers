@@ -7,7 +7,7 @@ from typing import Any
 import logging
 
 import httplib2
-from google.auth.exception import RefreshError
+from google.auth.exceptions import RefreshError
 from googleapiclient.errors import HttpError
 
 from .utils import save_pull_list
@@ -24,7 +24,7 @@ def build_gmail_service(creds: Any) -> Any:
             "The 'google' optional dependencies are required to read Google emails"
         ) from e
 
-    build("gmail", "v1", credentials=creds)
+    return build("gmail", "v1", credentials=creds)
 
 
 def _search_latest_google(service: Any, query: str) -> dict | None:
