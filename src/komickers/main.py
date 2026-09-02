@@ -1,6 +1,7 @@
 import logging
 import argparse
 from sys import stdout
+from pathlib import Path
 
 from komickers.exceptions import ConfigError
 
@@ -32,7 +33,8 @@ def main():
     logger.addHandler(console_handler)
 
     # Handler 2: Log File (always writes everything, even DEBUG)
-    file_handler = logging.FileHandler("logs/komickers.log")
+    log_path = Path(__file__).resolve().parents[2] / "logs/komickers.log"
+    file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(logging.DEBUG)
     file_format = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

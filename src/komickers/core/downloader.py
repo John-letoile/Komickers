@@ -31,9 +31,9 @@ def save_html_file(
         result: subprocess.CompletedProcess = subprocess.run(
             ["curl", "-fL", url], check=True, capture_output=True
         )
-    except subprocess.CalledProcessError:
-        logger.warning("Failed to fetch html file for %s", comic_name)
-        raise ExtractionError(f"Failed to fetch html file for {comic_name}")
+    except subprocess.CalledProcessError as cpe:
+        logger.warning("Failed to fetch html file for %s: %cpe", comic_name, cpe)
+        raise ExtractionError(f"Failed to fetch html file for {comic_name}") from cpe
 
     output = result.stdout
     file_path.write_bytes(output)

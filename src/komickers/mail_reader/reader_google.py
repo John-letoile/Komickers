@@ -77,8 +77,8 @@ def read_emails(creds: Any, tmp_path: Path) -> Path | None:
             'from:noreply@leagueofcomicgeeks.com subject:"Your Comic Pull List for"',
         )
         if latest is None:
-            print("No emails found.")
-            return None
+            logger.error("No emails were found with subject 'Your Comic Pull List for'")
+            raise EmailError("No pull list emails were found") from None
 
         msg: dict = (
             service.users()
@@ -95,8 +95,8 @@ def read_emails(creds: Any, tmp_path: Path) -> Path | None:
 
         html_body = _gmail_html(msg.get("payload", {}))
         if html_body is None:
-            print("Email does not contain an HTML body")
-            return None
+            logger.error("Email does not contain an HTML body")
+            raise EmailError("Email does not contain an HTML body") from None
 
         return save_pull_list(tmp_path, subject, html_body)
 

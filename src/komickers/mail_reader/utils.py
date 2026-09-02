@@ -4,6 +4,9 @@ import pickle
 from pathlib import Path
 from datetime import datetime
 import logging
+from re import sub
+
+from komickers.exceptions import NoPullListError
 
 logger = logging.getLogger(__name__)
 
@@ -23,16 +26,16 @@ def get_credentials(
     creds: google.oauth2.credentials.Credentials | None = None
     token_path.mkdir(parents=True, exist_ok=True)
     if (token_path / "token.pickle").exists():
-        print("Reading token file...")
+        logger.info("Reading token file...")
         with open(str(token_path / "token.pickle"), "rb") as token:
             creds = pickle.load(token)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            print("Credentials outdated. Refreshing...")
+            logger.info("Credentials outdated. Refreshing...")
             creds.refresh(Request())
         else:
-            print("Credentials not available. Creating them...")
+            logger.info("Credentials not available. Creating them...")
             flow = InstalledAppFlow.from_client_secrets_file(
                 str(credentials_path / "credentials.json"),
                 scopes,
@@ -69,24 +72,27 @@ def save_pull_list(tmp_path: Path, subject: str, html_body: str) -> Path | None:
       - If `<folder>/index.html` already exists, skip re-downloading.
       - Otherwise create the dated folder, write index.html, return it.
     """
+
     folder_name = parse_pull_list_date(subject)
     if folder_name is None:
-        print("Not a pull list email...")
-        return None
+        logger.warning("Not a pull list email: %s", subject)
+        raise NoPullListError("Not a pull list")
 
     email_path = tmp_path / folder_name
 
     if (email_path / "index.html").exists():
-        print(f"The latest pull list's index file already exists: {email_path.name}")
+        logger.info(
+            f"The latest pull list's index file already exists: {email_path.name}"
+        )
         print("-------------------------****-------------------------")
         return email_path
 
     email_path.mkdir(parents=True, exist_ok=True)
-    print("Pull List:", subject)
 
     with open(email_path / "index.html", "w", encoding="utf-8") as f:
         f.write(html_body)
 
-    print(f"Saved to {email_path}")
+    logger.debug("Saved to %s", email_path)
+    logger.info(f"Saved the pull list for {email_path.name}")
     print("-------------------------****-------------------------")
     return email_path

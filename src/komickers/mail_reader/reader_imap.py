@@ -43,7 +43,7 @@ def _fetch_latest_imap(mail: imaplib.IMAP4_SSL, provider: str) -> FetchedEmail |
 
     html_body = _extract_html(msg)
     if html_body is None:
-        return
+        return None
 
     return subject, html_body
 

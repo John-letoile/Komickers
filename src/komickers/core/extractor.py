@@ -42,13 +42,17 @@ def extract_names(file_path: Path) -> list[tuple[str, str]] | None:
 
     if heading is None:
         logger.error("No 'Pull List' section")
-        raise ExtractionError(f"Failed to find 'Pull List' section in {file_path}")
+        raise ExtractionError(
+            f"Failed to find 'Pull List' section in {file_path}"
+        ) from None
 
     section = heading.find_parent("table")
 
     if section is None:
         logger.error("No 'Pull List' container")
-        raise ExtractionError(f"Failed to find 'Pull List' container in {file_path}")
+        raise ExtractionError(
+            f"Failed to find 'Pull List' container in {file_path}"
+        ) from None
 
     for link in section.find_all("a", href=True):
         href = link["href"]
@@ -72,38 +76,37 @@ def extract_download_link(file_path: Path) -> str | None:
 
     if anchor is None:
         logger.warning("No 'DOWNLOAD NOW' linkg found in %s", file_path)
-        raise ExtractionError(f"No download link found in {file_path.name}")
+        raise ExtractionError(f"No download link found in {file_path.name}") from None
 
     download_url: str | None = anchor.get("href")
 
     if not download_url:
         logger.warning("Download anchor has no 'href' in %s", file_path)
-        raise ExtractionError(f"Download link has no URL in {file_path.name}")
+        raise ExtractionError(f"Download link has no URL in {file_path.name}") from None
 
-    result: subprocess.CompletedProcess = subprocess.run(
-        ["curl", "-I", download_url],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result: subprocess.CompletedProcess = subprocess.run(
+            ["curl", "-I", download_url],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except subprocess.CalledProcessError as cpe:
+        logger.error("Failed to extract download link for %s: %s", file_path, cpe)
+        raise ExtractionError(
+            f"Failed to extract download link for {file_path.name}"
+        ) from None
 
     # Get the output and error message (if any)
     output: list[str] = result.stdout.splitlines()
-    error = result.stderr
     server_side_url: str | None = None
 
-    # Check if it was successful
-    if result.returncode == 0:
-        for line in output:
-            if line.lower().startswith("location: "):
-                server_side_url = line.split(":", 1)[1].strip()
-
-    else:
-        print(error)
-        return None
+    for line in output:
+        if line.lower().startswith("location: "):
+            server_side_url = line.split(":", 1)[1].strip()
 
     if server_side_url is None:
-        logger.warning("The server responce missed a 'location' field")
+        logger.error("The server responce missed a 'location' field")
         raise ExtractionError("The server responce missed a 'location' field")
 
     return server_side_url
