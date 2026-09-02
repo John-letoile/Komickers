@@ -19,6 +19,7 @@ def main():
         "-v", "--verbose", action="store_true", help="Enable debug output"
     )
     args = parser.parse_args()
+
     # Configure root logger
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -26,12 +27,12 @@ def main():
     # Handler 1: Console (only shows INFO and above, respects user's -v flag)
     console_handler = logging.StreamHandler(stdout)
     console_handler.setLevel(logging.DEBUG if args.verbose else logging.INFO)
-    console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
+    console_format = logging.Formatter("%(message)s")
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
 
     # Handler 2: Log File (always writes everything, even DEBUG)
-    file_handler = logging.FileHandler("komickers.log")
+    file_handler = logging.FileHandler("logs/komickers.log")
     file_handler.setLevel(logging.DEBUG)
     file_format = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

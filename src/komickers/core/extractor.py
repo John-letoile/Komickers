@@ -103,7 +103,7 @@ def extract_download_link(file_path: Path) -> str | None:
         return None
 
     if server_side_url is None:
-        print("the server response didn't have a 'location' field")
-        return None
+        logger.warning("The server responce missed a 'location' field")
+        raise ExtractionError("The server responce missed a 'location' field")
 
     return server_side_url

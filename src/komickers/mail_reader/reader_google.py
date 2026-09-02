@@ -101,23 +101,23 @@ def read_emails(creds: Any, tmp_path: Path) -> Path | None:
         return save_pull_list(tmp_path, subject, html_body)
 
     except RefreshError:
-        logger.error("Token expired/revoked", exc_info=True)
+        logger.exception("Token expired/revoked")
         raise AuthenticationError(
             "Token expired/revoked — delete token/token.pickle and re-authenticate."
         ) from None
 
     except HttpError as e:
-        logger.error(f"Gmail API error: %d %s", e.status_code, e.reason, exc_info=True)
+        logger.exception("Gmail API error: %d %s", e.status_code, e.reason)
         raise EmailError(f"Gmail API error: {e.status_code} {e.reason}") from None
 
-    except httplib2.error.ServerNotFoundError as e:
-        logger.error("Gmail API error: %d %s", e.status_code, e.reason, exc_info=True)
-        raise EmailError(f"Gmail API error: {e.status_code} {e.reason}") from None
+    except httplib2.error.ServerNotFoundError:
+        logger.exception("Gmail API server unreachable")
+        raise EmailError("Failed to connect to Gmail API services") from None
 
     except TimeoutError:
-        logger.error("Gmail API request timed out", exc_info=True)
+        logger.exception("Gmail API request timed out")
         raise EmailError("Request to Gmail API timed out.") from None
 
     except gaierror:
-        logger.error("Gmail API DNS resolution failed", exc_info=True)
+        logger.exception("Gmail API DNS resolution failed")
         raise EmailError("Could not resolve Gmail API server address.") from None
