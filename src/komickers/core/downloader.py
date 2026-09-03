@@ -32,17 +32,17 @@ def save_html_file(
             ["curl", "-fL", url], check=True, capture_output=True
         )
     except subprocess.CalledProcessError as cpe:
-        logger.warning("Failed to fetch html file for %s: %cpe", comic_name, cpe)
+        logger.warning("Failed to fetch html file for %s: %s", comic_name, cpe)
         raise ExtractionError(f"Failed to fetch html file for {comic_name}") from cpe
 
     output = result.stdout
     file_path.write_bytes(output)
-    logger.info(f'Successfully saved "{comic_name}"')
+    logger.info("Successfully saved '%s'", comic_name)
     return file_path
 
 
 def download_comics_uget(urls_file_path: Path, inbox_dir: Path) -> None:
-    logger.info("Downloading...\n")
+    logger.info("Downloading...")
     if sys.platform == "linux":
         subprocess.run(
             [
@@ -74,7 +74,7 @@ def download_comics_uget(urls_file_path: Path, inbox_dir: Path) -> None:
 
 
 def download_comics_wget2(urls_file_path: Path, inbox_dir: Path) -> None:
-    logger.info("Downloading...\n")
+    logger.info("Downloading...")
     subprocess.run(
         [
             f"cat{urls_file_path}",
@@ -94,7 +94,7 @@ def download_comics_wget2(urls_file_path: Path, inbox_dir: Path) -> None:
 
 
 def download_comics_surgeDM(urls_file_path: Path, inbox_dir: Path) -> None:
-    logger.info("Downloading...\n")
+    logger.info("Downloading...")
     subprocess.run(
         ["surge", "--batch", urls_file_path, "--output", inbox_dir],
         check=True,
@@ -119,7 +119,7 @@ def download_comics(urls_file_path: Path, inbox_dir: Path, method: str) -> None:
         raise DownloaderError(f"Download manager '{method}' failed") from e
 
     except RuntimeError as rte:
-        logger.exception("Download manager '%s' missing", method)
+        logger.debug("Download manager '%s' missing", method, exc_info=True)
         raise DownloaderError(f"Downloading manager '{method}' missing") from rte
 
 
@@ -151,35 +151,35 @@ def extract_comics_from_file(
         print("\n-------------------------****-------------------------\n")
 
         for comic in pull_list:
-            logger.info(f'Trying to find "{comic[0]}"')
+            logger.info("Trying to find '%s'", comic[0])
             try:
                 comic_html_file = save_html_file(comic[0], comic[1], pull_list_path)
 
                 if comic_html_file is None:
-                    logger.info(f"Couldn't find page for {comic[0]}")
+                    logger.warning("Couldn't find page for '%s'", comic[0])
                     _log_missed_comics(missed_comics, missed_file, comic[0])
                     continue
 
-                logger.info(f"Found page\nExtracting download link for {comic[0]}")
+                logger.info("Found page\nExtracting download link for '%s'", comic[0])
 
                 extracted_comic_link = extract_download_link(comic_html_file)
 
                 if extracted_comic_link is None:
-                    logger.info(f"Couldn't extract download link for {comic[0]}")
+                    logger.warning("Couldn't extract download link for '%s'", comic[0])
                     _log_missed_comics(missed_comics, missed_file, comic[0])
                     continue
 
-                logger.info(f"Successfully extracted download link for {comic[0]}")
+                logger.info("Successfully extracted download link for '%s'", comic[0])
                 pulled_comics.append(comic[0])
                 pulled_file.write(f"{extracted_comic_link}\n")
                 print("\n-------------------------****-------------------------\n")
 
             except FileNotFoundError:
-                logger.info("The indicated file wasn't found")
+                logger.warning("The indicated file wasn't found")
                 _log_missed_comics(missed_comics, missed_file, comic[0])
 
             except ExtractionError as ee:
-                print(ee)
+                logger.debug(ee, exc_info=True)
                 _log_missed_comics(missed_comics, missed_file, comic[0])
 
     finally:

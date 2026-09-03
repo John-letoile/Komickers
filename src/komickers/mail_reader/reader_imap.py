@@ -56,8 +56,8 @@ def read_emails_app_password(
             try:
                 mail.login(email_address, app_password)
             except imaplib.IMAP4.error as e:
-                print(f"IMAP authentication failed for {email_address}: {e}")
-                return
+                logger.error("IMAP authentication failed for %s: %s", email_address, e)
+                raise AuthenticationError(f"IMAP authentication failed: {e}") from None
 
             try:
                 mail.select("INBOX")
@@ -72,11 +72,11 @@ def read_emails_app_password(
         raise EmailError(f"IMAP connection failed: {e}") from None
 
     except TimeoutError:
-        logger.exception("IMAP connection timed out")
+        logger.debug("IMAP connection timed out", exc_info=True)
         raise EmailError("Connection to email server timed out.") from None
 
     except gaierror:
-        logger.exception("IMAP DNS resolution failed")
+        logger.debug("IMAP DNS resolution failed", exc_info=True)
         raise EmailError("Could not resolve email server address.") from None
 
     if fetched is None:
@@ -117,15 +117,15 @@ def read_emails_oauth(
             fetched = _fetch_latest_imap(mail, provider)
 
     except imaplib.IMAP4.error as e:
-        logger.error("IMAP connection failed: %s", e)
+        logger.debug("IMAP connection failed: %s", e, exc_info=True)
         raise EmailError(f"IMAP connection failed: {e}") from None
 
     except TimeoutError:
-        logger.exception("IMAP connection timed out")
+        logger.debug("IMAP connection timed out", exc_info=True)
         raise EmailError("Connection to email server timed out.") from None
 
     except gaierror:
-        logger.exception("IMAP DNS resolution failed")
+        logger.debug("IMAP DNS resolution failed", exc_info=True)
         raise EmailError("Could not resolve email server address.") from None
 
     if fetched is None:

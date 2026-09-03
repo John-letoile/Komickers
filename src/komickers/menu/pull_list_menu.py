@@ -1,9 +1,6 @@
 from pathlib import Path
 import logging
 
-from socket import gaierror
-import httplib2
-
 from komickers.core.downloader import (
     Inventory,
     extract_comics_from_file,
@@ -14,7 +11,6 @@ from komickers.mail_reader.reader import read_emails
 from komickers.exceptions import (
     AuthenticationError,
     EmailError,
-    ExtractionError,
     DownloaderError,
 )
 

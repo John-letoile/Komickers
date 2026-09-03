@@ -4,9 +4,8 @@ import pickle
 from pathlib import Path
 from datetime import datetime
 import logging
-from re import sub
 
-from komickers.exceptions import NoPullListError
+from komickers.exceptions import EmailError, NoPullListError
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +15,7 @@ def get_credentials(
 ) -> google.oauth2.credentials.Credentials | None:
     try:
         import google
+        from google.auth.exceptions import TransportError
         from google.auth.transport.requests import Request
         from google_auth_oauthlib.flow import InstalledAppFlow
     except ImportError as e:
@@ -33,7 +33,13 @@ def get_credentials(
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             logger.info("Credentials outdated. Refreshing...")
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except TransportError as te:
+                logger.debug(
+                    "Failed to refresh OAuth2 credentials: %s", te, exc_info=True
+                )
+                raise EmailError("Failed to refresh OAuth2 credentiald")
         else:
             logger.info("Credentials not available. Creating them...")
             flow = InstalledAppFlow.from_client_secrets_file(
@@ -82,7 +88,7 @@ def save_pull_list(tmp_path: Path, subject: str, html_body: str) -> Path | None:
 
     if (email_path / "index.html").exists():
         logger.info(
-            f"The latest pull list's index file already exists: {email_path.name}"
+            "The latest pull list's index file already exists: %s", email_path.name
         )
         print("-------------------------****-------------------------")
         return email_path
@@ -93,6 +99,6 @@ def save_pull_list(tmp_path: Path, subject: str, html_body: str) -> Path | None:
         f.write(html_body)
 
     logger.debug("Saved to %s", email_path)
-    logger.info(f"Saved the pull list for {email_path.name}")
+    logger.info("Saved the pull list for %s", email_path.name)
     print("-------------------------****-------------------------")
     return email_path

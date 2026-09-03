@@ -75,7 +75,7 @@ def extract_download_link(file_path: Path) -> str | None:
     anchor = soup.select_one('a[title="DOWNLOAD NOW"]')
 
     if anchor is None:
-        logger.warning("No 'DOWNLOAD NOW' linkg found in %s", file_path)
+        logger.warning("No 'DOWNLOAD NOW' link found in %s", file_path)
         raise ExtractionError(f"No download link found in {file_path.name}") from None
 
     download_url: str | None = anchor.get("href")
@@ -89,7 +89,7 @@ def extract_download_link(file_path: Path) -> str | None:
             ["curl", "-I", download_url],
             capture_output=True,
             text=True,
-            check=False,
+            check=True,
         )
     except subprocess.CalledProcessError as cpe:
         logger.error("Failed to extract download link for %s: %s", file_path, cpe)
@@ -106,7 +106,7 @@ def extract_download_link(file_path: Path) -> str | None:
             server_side_url = line.split(":", 1)[1].strip()
 
     if server_side_url is None:
-        logger.error("The server responce missed a 'location' field")
+        logger.warning("The server response missed a 'location' field")
         raise ExtractionError("The server responce missed a 'location' field")
 
     return server_side_url

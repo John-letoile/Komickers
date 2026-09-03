@@ -7,8 +7,6 @@ from typing import Any
 import logging
 
 import httplib2
-from google.auth.exceptions import RefreshError
-from googleapiclient.errors import HttpError
 
 from .utils import save_pull_list
 from komickers.exceptions import AuthenticationError, EmailError
@@ -77,7 +75,7 @@ def read_emails(creds: Any, tmp_path: Path) -> Path | None:
             'from:noreply@leagueofcomicgeeks.com subject:"Your Comic Pull List for"',
         )
         if latest is None:
-            logger.error("No emails were found with subject 'Your Comic Pull List for'")
+            logger.info("No emails were found with subject 'Your Comic Pull List for'")
             raise EmailError("No pull list emails were found") from None
 
         msg: dict = (
@@ -95,29 +93,29 @@ def read_emails(creds: Any, tmp_path: Path) -> Path | None:
 
         html_body = _gmail_html(msg.get("payload", {}))
         if html_body is None:
-            logger.error("Email does not contain an HTML body")
+            logger.warning("Email does not contain an HTML body")
             raise EmailError("Email does not contain an HTML body") from None
 
         return save_pull_list(tmp_path, subject, html_body)
 
-    except RefreshError:
-        logger.exception("Token expired/revoked")
+    except RefreshError as re:
+        logger.debug("Token expired/revoked %s", re, exc_info=True)
         raise AuthenticationError(
             "Token expired/revoked — delete token/token.pickle and re-authenticate."
         ) from None
 
     except HttpError as e:
-        logger.exception("Gmail API error: %d %s", e.status_code, e.reason)
+        logger.debug("Gmail API error: %d %s", e.status_code, e.reason, exc_info=True)
         raise EmailError(f"Gmail API error: {e.status_code} {e.reason}") from None
 
     except httplib2.error.ServerNotFoundError:
-        logger.exception("Gmail API server unreachable")
+        logger.debug("Gmail API server unreachable", exc_info=True)
         raise EmailError("Failed to connect to Gmail API services") from None
 
     except TimeoutError:
-        logger.exception("Gmail API request timed out")
+        logger.debug("Gmail API request timed out", exc_info=True)
         raise EmailError("Request to Gmail API timed out.") from None
 
     except gaierror:
-        logger.exception("Gmail API DNS resolution failed")
+        logger.debug("Gmail API DNS resolution failed", exc_info=True)
         raise EmailError("Could not resolve Gmail API server address.") from None

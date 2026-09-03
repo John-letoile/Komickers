@@ -11,6 +11,14 @@ from .menu.download_menu import download_menu
 from .menu.pull_list_menu import pull_list_menu
 
 
+class NoTracebackFilter(logging.Filter):
+    def filter(self, record):
+        # Remove exception info so the traceback is not displayed
+        record.exc_info = None
+        record.exc_text = None
+        return True
+
+
 def main():
     # Arguement Parser
     parser = argparse.ArgumentParser(
@@ -25,15 +33,25 @@ def main():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
+    # Silence noisy third-party loggers
+    logging.getLogger("google").setLevel(logging.WARNING)
+    logging.getLogger("google.auth").setLevel(logging.WARNING)
+    logging.getLogger("googleapiclient").setLevel(logging.WARNING)
+    logging.getLogger("httplib2").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("oauth2client").setLevel(logging.WARNING)
+
     # Handler 1: Console (only shows INFO and above, respects user's -v flag)
     console_handler = logging.StreamHandler(stdout)
     console_handler.setLevel(logging.DEBUG if args.verbose else logging.INFO)
     console_format = logging.Formatter("%(message)s")
     console_handler.setFormatter(console_format)
+    console_handler.addFilter(NoTracebackFilter())
     logger.addHandler(console_handler)
 
     # Handler 2: Log File (always writes everything, even DEBUG)
     log_path = Path(__file__).resolve().parents[2] / "logs/komickers.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(logging.DEBUG)
     file_format = logging.Formatter(
