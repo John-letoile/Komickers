@@ -110,7 +110,12 @@ def read_emails_oauth(
             try:
                 mail.authenticate("XOAUTH2", xoauth2)
             except imaplib.IMAP4.error as e:
-                logger.error("IMAP authentication failed for %s: %s", email_address, e)
+                logger.debug(
+                    "IMAP authentication failed for %s: %s",
+                    email_address,
+                    e,
+                    exc_info=True,
+                )
                 raise AuthenticationError(f"IMAP authentication failed: {e}") from None
 
             try:
