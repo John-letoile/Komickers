@@ -26,6 +26,7 @@ def download_menu(config: dict) -> None:
     with open(pull_list_path, "r", encoding="utf-8") as f:
         names: list[str] = [line.rstrip() for line in f if line.strip()]
 
+    index_dir.mkdir(parents=True, exist_ok=True)
     pull_list: list[tuple[str, str]] = [(name, formatter(year, name)) for name in names]
     inbox_path = Path(config["download"]["downloads_dir"])
     method = config["download"]["download_manager"]
