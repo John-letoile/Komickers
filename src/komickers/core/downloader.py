@@ -113,8 +113,11 @@ def download_comics(urls_file_path: Path, inbox_dir: Path, method: str) -> None:
             raise ValueError("Please select one of the available download methods")
 
     except subprocess.CalledProcessError as e:
-        logger.exception(
-            "Download manager '%s' failed (exit code %d)", method, e.returncode
+        logger.debug(
+            "Download manager '%s' failed (exit code %d)",
+            method,
+            e.returncode,
+            exc_info=True,
         )
         raise DownloaderError(f"Download manager '{method}' failed") from e
 
@@ -160,7 +163,7 @@ def extract_comics_from_file(
                     _log_missed_comics(missed_comics, missed_file, comic[0])
                     continue
 
-                logger.info("Found page\nExtracting download link for '%s'", comic[0])
+                logger.info("Found page. Extracting download link for '%s'", comic[0])
 
                 extracted_comic_link = extract_download_link(comic_html_file)
 

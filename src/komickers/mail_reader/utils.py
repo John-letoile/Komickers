@@ -39,7 +39,7 @@ def get_credentials(
                 logger.debug(
                     "Failed to refresh OAuth2 credentials: %s", te, exc_info=True
                 )
-                raise EmailError("Failed to refresh OAuth2 credentiald")
+                raise EmailError("Failed to refresh OAuth2 credentials")
         else:
             logger.info("Credentials not available. Creating them...")
             flow = InstalledAppFlow.from_client_secrets_file(

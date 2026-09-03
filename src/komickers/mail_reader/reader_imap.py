@@ -3,6 +3,7 @@ import imaplib
 from email import policy
 from email.message import EmailMessage
 from pathlib import Path
+from sys import exc_info
 from typing import Any
 import logging
 from socket import gaierror
@@ -56,19 +57,24 @@ def read_emails_app_password(
             try:
                 mail.login(email_address, app_password)
             except imaplib.IMAP4.error as e:
-                logger.error("IMAP authentication failed for %s: %s", email_address, e)
+                logger.debug(
+                    "IMAP authentication failed for %s: %s",
+                    email_address,
+                    e,
+                    exc_info=True,
+                )
                 raise AuthenticationError(f"IMAP authentication failed: {e}") from None
 
             try:
                 mail.select("INBOX")
             except imaplib.IMAP4.error as e:
-                logger.error("Failed to open INBOX: %s", e)
+                logger.debug("Failed to open INBOX: %s", e, exc_info=True)
                 raise InboxError(f"Failed to open inbox: {e}") from None
 
             fetched = _fetch_latest_imap(mail, provider)
 
     except imaplib.IMAP4.error as e:
-        logger.error("IMAP connection failed: %s", e)
+        logger.debug("IMAP connection failed: %s", e, exc_info=True)
         raise EmailError(f"IMAP connection failed: {e}") from None
 
     except TimeoutError:
@@ -110,7 +116,7 @@ def read_emails_oauth(
             try:
                 mail.select("INBOX")
             except imaplib.IMAP4.error as e:
-                logger.error("IMAP failed to read inbox: %s", e)
+                logger.debug("IMAP failed to read inbox: %s", e, exc_info=True)
                 raise InboxError(f"Failed to open inbox: {e}") from None
 
             # Search for messages from the sender whose subject contains the phrase

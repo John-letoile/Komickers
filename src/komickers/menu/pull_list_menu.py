@@ -1,5 +1,4 @@
 from pathlib import Path
-import logging
 
 from komickers.core.downloader import (
     Inventory,
@@ -13,8 +12,6 @@ from komickers.exceptions import (
     EmailError,
     DownloaderError,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def pull_list_menu(config: dict) -> None:
