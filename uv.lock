@@ -523,6 +523,7 @@ source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "httplib2" },
+    { name = "ruff" },
     { name = "tomlkit" },
 ]
 
@@ -559,7 +560,8 @@ requires-dist = [
     { name = "komickers", extras = ["dev", "google"], marker = "extra == 'all'" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.3.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "ruff", specifier = ">=0.16.5" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.16.5" },
     { name = "tomlkit", specifier = ">=0.15.1" },
 ]
 provides-extras = ["dev", "google", "all"]

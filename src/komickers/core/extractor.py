@@ -1,8 +1,9 @@
+import logging
+import re
 import subprocess
 from pathlib import Path
+
 from bs4 import BeautifulSoup
-import re
-import logging
 
 from komickers.exceptions import ExtractionError
 

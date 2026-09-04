@@ -1,9 +1,10 @@
 import copy
-from pathlib import Path
 import logging
+from pathlib import Path
+
+import tomlkit
 
 from komickers.exceptions import ConfigError
-import tomlkit
 
 logger = logging.getLogger(__name__)
 

@@ -2,16 +2,16 @@ from pathlib import Path
 
 from komickers.core.downloader import (
     Inventory,
-    extract_comics_from_file,
     download_from_inventory,
+    extract_comics_from_file,
 )
 from komickers.core.extractor import extract_names
-from komickers.mail_reader.reader import read_emails
 from komickers.exceptions import (
     AuthenticationError,
-    EmailError,
     DownloaderError,
+    EmailError,
 )
+from komickers.mail_reader.reader import read_emails
 
 
 def pull_list_menu(config: dict) -> None:

@@ -1,12 +1,19 @@
 from __future__ import annotations
 
-import pickle
-from pathlib import Path
-from datetime import datetime
 import logging
+import pickle
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 from komickers.exceptions import EmailError, NoPullListError
 
+# Ruff, mypy, and IDEs will treat this as a valid import.
+# At runtime, TYPE_CHECKING is False, so nothing is imported.
+if TYPE_CHECKING:
+    import google.auth
+    
+    
 logger = logging.getLogger(__name__)
 
 
@@ -14,7 +21,6 @@ def get_credentials(
     token_path: Path, credentials_path: Path, scopes: list[str]
 ) -> google.oauth2.credentials.Credentials | None:
     try:
-        import google
         from google.auth.exceptions import TransportError
         from google.auth.transport.requests import Request
         from google_auth_oauthlib.flow import InstalledAppFlow
@@ -63,7 +69,9 @@ def parse_pull_list_date(text: str | None) -> str | None:
         return None
 
     try:
-        date = datetime.strptime(text.removeprefix(prefix), "%B %d, %Y")
+        date = datetime.strptime(text.removeprefix(prefix), "%B %d, %Y").replace(
+    tzinfo=UTC
+)
     except ValueError:
         return None
 

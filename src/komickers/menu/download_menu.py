@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from komickers.core.extractor import formatter
 from komickers.core.downloader import (
     Inventory,
-    extract_comics_from_file,
     download_from_inventory,
+    extract_comics_from_file,
 )
+from komickers.core.extractor import formatter
 from komickers.exceptions import DownloaderError
 
 

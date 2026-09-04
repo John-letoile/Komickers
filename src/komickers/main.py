@@ -1,7 +1,7 @@
-import logging
 import argparse
-from sys import stdout
+import logging
 from pathlib import Path
+from sys import stdout
 
 from komickers.exceptions import ConfigError
 

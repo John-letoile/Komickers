@@ -1,12 +1,13 @@
+import logging
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TextIO
-from dataclasses import dataclass
-import logging
+
+from komickers.exceptions import DownloaderError, ExtractionError
 
 from .extractor import extract_download_link
-from komickers.exceptions import DownloaderError, ExtractionError
 
 logger = logging.getLogger(__name__)
 

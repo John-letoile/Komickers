@@ -1,15 +1,14 @@
 import email
 import imaplib
+import logging
 from email import policy
 from email.message import EmailMessage
 from pathlib import Path
-from sys import exc_info
-from typing import Any
-import logging
 from socket import gaierror
+from typing import Any
 
-from komickers.mail_reader.utils import save_pull_list
 from komickers.exceptions import AuthenticationError, EmailError, InboxError
+from komickers.mail_reader.utils import save_pull_list
 
 logger = logging.getLogger(__name__)
 FetchedEmail = tuple[str, str]  # (subject, html_body)

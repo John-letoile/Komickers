@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import logging
 from base64 import urlsafe_b64decode
 from pathlib import Path
 from socket import gaierror
 from typing import Any
-import logging
 
 import httplib2
 
-from .utils import save_pull_list
 from komickers.exceptions import AuthenticationError, EmailError
+
+from .utils import save_pull_list
 
 logger = logging.getLogger(__name__)
 
