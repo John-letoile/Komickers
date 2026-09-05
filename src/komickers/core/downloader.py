@@ -146,11 +146,10 @@ def extract_comics_from_file(
     extracted_urls_path.write_text("")
     missed_path.write_text("")
 
-    # open files one
-    pulled_file = open(extracted_urls_path, "a")
-    missed_file = open(missed_path, "a")
-
-    try:
+    with (
+        extracted_urls_path.open("a", encoding="utf-8") as pulled_file,
+        missed_path.open("a", encoding="utf-8") as missed_file,
+    ):
         logger.info("Extracting download links...")
         print("\n-------------------------****-------------------------\n")
 
@@ -185,10 +184,6 @@ def extract_comics_from_file(
             except ExtractionError as ee:
                 logger.debug(ee, exc_info=True)
                 _log_missed_comics(missed_comics, missed_file, comic[0])
-
-    finally:
-        pulled_file.close()
-        missed_file.close()
 
     return Inventory(pulled_comics, missed_comics, extracted_urls_path)
 

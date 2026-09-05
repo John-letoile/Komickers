@@ -39,3 +39,5 @@ where = ["src"]
 [tool.ruff]
 line-length = 88
 
+[tool.ruff.lint]
+extend-ignore = ["EXE002"]
