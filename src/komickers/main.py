@@ -41,6 +41,7 @@ def main():
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("oauth2client").setLevel(logging.WARNING)
     logging.getLogger("google_auth_oauthlib").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     # Handler 1: Console (only shows INFO and above, respects user's -v flag)
     console_handler = logging.StreamHandler(stdout)

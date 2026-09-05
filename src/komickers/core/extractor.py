@@ -2,6 +2,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
+import httpx
 
 from bs4 import BeautifulSoup
 
@@ -85,26 +86,24 @@ def extract_download_link(file_path: Path) -> str | None:
         logger.warning("Download anchor has no 'href' in %s", file_path)
         raise ExtractionError(f"Download link has no URL in {file_path.name}") from None
 
-    try:
-        result: subprocess.CompletedProcess = subprocess.run(
-            ["curl", "-I", download_url],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except subprocess.CalledProcessError as cpe:
-        logger.error("Failed to extract download link for %s: %s", file_path, cpe)
-        raise ExtractionError(
-            f"Failed to extract download link for {file_path.name}"
-        ) from None
-
-    # Get the output and error message (if any)
-    output: list[str] = result.stdout.splitlines()
     server_side_url: str | None = None
+    with httpx.Client() as client:
+        response: httpx.Response = client.head(download_url)
 
-    for line in output:
-        if line.lower().startswith("location: "):
-            server_side_url = line.split(":", 1)[1].strip()
+        if response.status_code == 302:
+            server_side_url = response.headers.get("location")
+
+        else:
+            logger.error(
+                "Failed to extract download link for %s: %d",
+                file_path,
+                response.status_code,
+            )
+            raise ExtractionError(
+                f"Failed to extract download link for {file_path.name}"
+            ) from None
+
+        # Get the output and error message (if any)
 
     if server_side_url is None:
         logger.warning("The server response missed a 'location' field")

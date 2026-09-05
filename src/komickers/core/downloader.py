@@ -4,6 +4,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TextIO
+import httpx
 
 from komickers.exceptions import DownloaderError, ExtractionError
 
@@ -28,15 +29,20 @@ def save_html_file(
 
     file_path: Path = tmp_html_dir / f"{comic_name_formatted[1:-1]}.html"
 
-    try:
-        result: subprocess.CompletedProcess = subprocess.run(
-            ["curl", "-fL", url], check=True, capture_output=True
-        )
-    except subprocess.CalledProcessError as cpe:
-        logger.warning("Failed to fetch html file for %s: %s", comic_name, cpe)
-        raise ExtractionError(f"Failed to fetch html file for {comic_name}") from cpe
+    with httpx.Client() as client:
+        try:
+            response: httpx.Response = client.get(url, follow_redirects=True)
+            response.raise_for_status()
 
-    output = result.stdout
+        except httpx.HTTPError as httpe:
+            logger.debug(
+                "Failed to fetch html file for %s: %s", comic_name, httpe, exc_info=True
+            )
+            raise ExtractionError(
+                f"Failed to fetch html file for {comic_name}"
+            ) from httpe
+
+    output = response.content
     file_path.write_bytes(output)
     logger.info("Successfully saved '%s'", comic_name)
     return file_path
@@ -178,11 +184,11 @@ def extract_comics_from_file(
                 print("\n-------------------------****-------------------------\n")
 
             except FileNotFoundError:
-                logger.warning("The indicated file wasn't found")
+                logger.info("Couldn't find the file")
                 _log_missed_comics(missed_comics, missed_file, comic[0])
 
             except ExtractionError as ee:
-                logger.debug(ee, exc_info=True)
+                logger.info(ee)
                 _log_missed_comics(missed_comics, missed_file, comic[0])
 
     return Inventory(pulled_comics, missed_comics, extracted_urls_path)
