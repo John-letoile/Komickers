@@ -13,6 +13,7 @@ requires-python = ">=3.11"
 dependencies = [
     "beautifulsoup4>=4.15.0",
     "httplib2>=0.31.0",
+    "mypy>=2.3.1",
     "ruff>=0.16.5",
     "tomlkit>=0.15.1",
 ]
@@ -41,3 +42,10 @@ line-length = 88
 
 [tool.ruff.lint]
 extend-ignore = ["EXE002"]
+
+[tool.mypy]
+disable_error_code = ["import-untyped"]
+
+[[tool.mypy.overrides]]
+module = ["google.*"]
+ignore_missing_imports = true

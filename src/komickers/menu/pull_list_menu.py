@@ -27,7 +27,7 @@ def pull_list_menu(config: dict) -> None:
                 "Please select your preferred method of logging in:\ng) Google API\ni) IMAP\n"
             )
             login_method: str = input("your selection: ")
-            pull_list_path: Path | None = read_emails(config, login_method)
+            pull_list_path = read_emails(config, login_method)
             pulled = True
 
         except AuthenticationError as ae:

@@ -38,7 +38,10 @@ def _fetch_latest_imap(mail: imaplib.IMAP4_SSL, provider: str) -> FetchedEmail |
     if status != "OK":
         raise imaplib.IMAP4.error("Failed to fetch email")
 
-    msg = email.message_from_bytes(data[0][1], policy=policy.default)
+    if data is None or not data[0]:
+        raise imaplib.IMAP4.error("Failed to fetch email")
+
+    msg = email.message_from_bytes(data[0][1], policy=policy.default)  # type: ignore[arg-type]
     subject = str(msg["Subject"] or "")
 
     html_body = _extract_html(msg)

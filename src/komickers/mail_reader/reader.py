@@ -19,8 +19,8 @@ def read_emails(config: dict, login_method: str) -> Path | None:
     if login_method.lower() in {"g", "1"}:
         token_path = Path(config["directories"]["token_dir"])
         credentials_path = Path(config["directories"]["credentials_dir"])
-        scopes: list[str] = config["email"]["scopes"]
-        creds = get_credentials(token_path, credentials_path, scopes)
+        scopes_google: list[str] = config["email"]["scopes"]
+        creds = get_credentials(token_path, credentials_path, scopes_google)
         return _read_emails_google(creds, tmp_path)
 
     elif login_method.lower() in {"i", "2"}:
@@ -36,8 +36,8 @@ def read_emails(config: dict, login_method: str) -> Path | None:
         elif auth_method.lower() in {"o", "2"}:
             token_path = Path(config["directories"]["token_dir"])
             credentials_path = Path(config["directories"]["credentials_dir"])
-            scopes: list[str] = config["email"]["scopes"]
-            creds = get_credentials(token_path, credentials_path, scopes)
+            scopes_imap: list[str] = config["email"]["scopes"]
+            creds = get_credentials(token_path, credentials_path, scopes_imap)
             return _read_emails_oauth(email_address, provider, tmp_path, creds)
 
         else:

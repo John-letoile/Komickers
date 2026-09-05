@@ -11,9 +11,9 @@ from komickers.exceptions import EmailError, NoPullListError
 # Ruff, mypy, and IDEs will treat this as a valid import.
 # At runtime, TYPE_CHECKING is False, so nothing is imported.
 if TYPE_CHECKING:
-    import google.auth
-    
-    
+    import google.oauth2.credentials.Credentials
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,8 +70,8 @@ def parse_pull_list_date(text: str | None) -> str | None:
 
     try:
         date = datetime.strptime(text.removeprefix(prefix), "%B %d, %Y").replace(
-    tzinfo=UTC
-)
+            tzinfo=UTC
+        )
     except ValueError:
         return None
 

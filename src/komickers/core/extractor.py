@@ -79,7 +79,7 @@ def extract_download_link(file_path: Path) -> str | None:
         logger.warning("No 'DOWNLOAD NOW' link found in %s", file_path)
         raise ExtractionError(f"No download link found in {file_path.name}") from None
 
-    download_url: str | None = anchor.get("href")
+    download_url: str | None = anchor.get("href")  # type: ignore[assignment]
 
     if not download_url:
         logger.warning("Download anchor has no 'href' in %s", file_path)
